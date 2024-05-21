@@ -89,7 +89,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       break;
 
-    case 10283: // Tab
+    case 43: // Tab
       if (record->event.pressed && is_alt_tab_enabled) {
         is_alt_tab_enabled = false;
 
@@ -102,12 +102,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       break;
     }
 
-  return true;
+  return true                 ;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     // Auto enable scroll mode when the highest layer is 3
-    keyball_set_scroll_mode(get_highest_layer(state) == 3);
+    // keyball_set_scroll_mode(get_highest_layer(state) == 3);
+    keyball_set_scroll_mode(IS_LAYER_ON_STATE(state, 3));
     return state;
 }
 
