@@ -19,6 +19,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 
 #include "quantum.h"
+#ifdef CONSOLE_ENABLE
+  #include <print.h>
+#endif
+
 
 // clang-format off
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
@@ -52,6 +56,54 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   ),
 };
 // clang-format on
+
+#ifdef CONSOLE_ENABLE
+void matrix_init_kb(void) {
+    debug_enable = true;
+    debug_matrix = true;
+    debug_mouse  = true;
+}
+#endif
+
+bool is_alt_tab_enabled = false;
+bool is_alt_tab_active = false;
+
+// ALT_TAB キーのキーマップへの割り当てコードは省略
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+
+#ifdef CONSOLE_ENABLE
+    uprintf("%d %d\n", keycode, record->event.pressed);
+#endif
+
+    switch (keycode)
+    {
+    case 17708: // Layer(5)
+      if (record->event.pressed) {
+        is_alt_tab_enabled = true;
+      } else {
+        is_alt_tab_enabled = false;
+        if (is_alt_tab_active) {
+          unregister_code(227); // R command
+          is_alt_tab_active = false;
+        }
+      }
+      break;
+
+    case 10283: // Tab
+      if (record->event.pressed && is_alt_tab_enabled) {
+        is_alt_tab_enabled = false;
+
+        register_code(227); // R command
+        is_alt_tab_active = true;
+      }
+      break;
+    
+    default:
+      break;
+    }
+
+  return true;
+}
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     // Auto enable scroll mode when the highest layer is 3
