@@ -83,7 +83,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       } else {
         is_alt_tab_enabled = false;
         if (is_alt_tab_active) {
-          unregister_code(227); // R command
+          unregister_code(227); // L command
           is_alt_tab_active = false;
         }
       }
@@ -93,7 +93,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed && is_alt_tab_enabled) {
         is_alt_tab_enabled = false;
 
-        register_code(227); // R command
+        register_code(227); // L command
         is_alt_tab_active = true;
       }
       break;
