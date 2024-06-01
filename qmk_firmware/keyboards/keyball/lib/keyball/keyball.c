@@ -34,8 +34,10 @@ const uint16_t AML_TIMEOUT_MAX = 1000;
 const uint16_t AML_TIMEOUT_QU  = 50;   // Quantization Unit
 
 static const char BL = '\xB0'; // Blank indicator character
+#ifdef OLED_ENABLE
 static const char LFSTR_ON[] PROGMEM = "\xB2\xB3";
 static const char LFSTR_OFF[] PROGMEM = "\xB4\xB5";
+#endif
 
 keyball_t keyball = {
     .this_have_ball = false,
@@ -167,6 +169,10 @@ void pointing_device_driver_set_cpi(uint16_t cpi) {
 }
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
+#ifdef CONSOLE_ENABLE
+    uprintf("ballmove: %d %d\n", m->x, m->y);
+#endif
+
 #if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44
     r->x = clip2int8(m->y);
     r->y = clip2int8(m->x);
@@ -186,6 +192,10 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_
 }
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
+#ifdef CONSOLE_ENABLE
+    uprintf("ballscroll: %d %d\n", m->x, m->y);
+#endif
+
     // consume motion of trackball.
     int16_t div = 1 << (keyball_get_scroll_div() - 1);
     int16_t x = divmod16(&m->x, div);
@@ -383,18 +393,18 @@ static void rpc_set_cpi_invoke(void) {
 //////////////////////////////////////////////////////////////////////////////
 // OLED utility
 
-#ifdef OLED_ENABLE
 // clang-format off
 const char PROGMEM code_to_name[] = {
+#ifdef OLED_ENABLE
     'a', 'b', 'c', 'd', 'e', 'f',  'g', 'h', 'i',  'j',
     'k', 'l', 'm', 'n', 'o', 'p',  'q', 'r', 's',  't',
     'u', 'v', 'w', 'x', 'y', 'z',  '1', '2', '3',  '4',
     '5', '6', '7', '8', '9', '0',  'R', 'E', 'B',  'T',
     '_', '-', '=', '[', ']', '\\', '#', ';', '\'', '`',
     ',', '.', '/',
+#endif
 };
 // clang-format on
-#endif
 
 void keyball_oled_render_ballinfo(void) {
 #ifdef OLED_ENABLE
