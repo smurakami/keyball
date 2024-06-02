@@ -67,6 +67,7 @@ void matrix_init_kb(void) {
 
 bool is_alt_tab_enabled = false;
 bool is_alt_tab_active = false;
+uint16_t esc_timer = 0;
 
 // ALT_TAB キーのキーマップへの割り当てコードは省略
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -95,6 +96,17 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 
         register_code(227); // L command
         is_alt_tab_active = true;
+      }
+      break;
+
+    case 20576: // LT(3)
+      if (record->event.pressed) {
+        esc_timer = timer_read();
+      } else {
+        uint16_t timer = timer_read();
+        if (timer - esc_timer <= TAPPING_TERM) {
+          tap_code(KC_ESC);
+        }
       }
       break;
     
