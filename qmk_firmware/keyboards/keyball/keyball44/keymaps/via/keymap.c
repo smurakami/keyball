@@ -140,12 +140,36 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       break;
 
+    case 0x5F50:
+      if (record->event.pressed) {
+        register_code(KC_SPC); // L command
+        register_code(KC_MS_BTN1); // L command
+        // defer_exec(30, down_mouse1, NULL);
+      } else {
+        unregister_code(KC_SPC); // L command
+        unregister_code(KC_MS_BTN1); // L command
+        // defer_exec(30, up_mouse1, NULL);
+      }
+      break;
+
+    case 0x5F51:
+      if (record->event.pressed) {
+        register_code(KC_LALT); // L command
+        register_code(KC_MS_BTN1); // L command
+      } else {
+        unregister_code(KC_MS_BTN1); // L command
+        unregister_code(KC_LALT); // L command
+      }
+      break;
+
     default:
       break;
     }
 
   return resume;
 }
+
+
 
 layer_state_t layer_state_set_user(layer_state_t state) {
     // Auto enable scroll mode when the highest layer is 3
