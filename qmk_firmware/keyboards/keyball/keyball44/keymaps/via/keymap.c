@@ -65,23 +65,31 @@ void matrix_init_kb(void) {
 }
 #endif
 
+
+// 状態管理に使う変数
 bool is_alt_tab_enabled = false;
 bool is_alt_tab_active = false;
 uint16_t esc_timer = 0;
+uint16_t rgui_timer = 0;
 
-// ALT_TAB キーのキーマップへの割り当てコードは省略
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  bool resume = true;
 
 #ifdef CONSOLE_ENABLE
     uprintf("%d %d\n", keycode, record->event.pressed);
 #endif
 
-    switch (keycode)
-    {
-    case 17708: // Layer(5)
+    switch (keycode) {
+
+    case LT(5,KC_SPC):
       if (record->event.pressed) {
+        // alttabをレイヤーキーで発動できるように
         is_alt_tab_enabled = true;
       } else {
+        // 手動マウス用のレイヤーを抜けた時は、だいたい文字を打ちたい時なので、オートマウスレイヤも抜ける。
+        layer_off(AUTO_MOUSE_DEFAULT_LAYER);
+
+        // alttabをレイヤーキーで発動できるように
         is_alt_tab_enabled = false;
         if (is_alt_tab_active) {
           unregister_code(227); // L command
@@ -90,7 +98,8 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       break;
 
-    case 43: // Tab
+    case KC_TAB: // Tab
+        // alttabをレイヤーキーで発動できるように
       if (record->event.pressed && is_alt_tab_enabled) {
         is_alt_tab_enabled = false;
 
@@ -98,23 +107,44 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         is_alt_tab_active = true;
       }
       break;
+    
+    case KC_RGUI:
+      if (record->event.pressed) {
+        // 右コマンドを押した時はショートカットきーを打ちたい時なのでマウスレイヤを抜ける。
+        layer_off(AUTO_MOUSE_DEFAULT_LAYER);
+        rgui_timer = timer_read();
+      } else {
+        // タップでエンターキー発動。
+        // 右コマンド認識までのタイムラグを作りたくないので、RGUI(kc)ではなく自前でタップを実装
+        resume = false;
+        unregister_code(KC_RGUI); // R command
+        uint16_t timer = timer_read();
+        if (timer - rgui_timer <= TAPPING_TERM) {
+          tap_code(KC_ENT);
+        }
+      }
+      break;
 
-    case 20576: // LT(3)
+    case 20576: // MO(3)
+      // タップでESC発動
+      // LT(layer, kc)だとレイヤが有効になるのにタイムラグがある。
+      // 結果スクロールの発動にタイムラグが生まれるので、自前でタップを実装しタイムラグをなくす。
       if (record->event.pressed) {
         esc_timer = timer_read();
       } else {
         uint16_t timer = timer_read();
         if (timer - esc_timer <= TAPPING_TERM) {
           tap_code(KC_ESC);
+          tap_code(KC_LNG2);
         }
       }
       break;
-    
+
     default:
       break;
     }
 
-  return true                 ;
+  return resume;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
