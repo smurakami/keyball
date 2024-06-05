@@ -194,9 +194,9 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
 #ifdef CONSOLE_ENABLE
     uprintf("#osc ballscroll: %d %d\n", m->x, m->y);
+    int16_t prev_x = m->x;
+    int16_t prev_y = m->y;
 #endif
-    // int16_t prev_x = m->x;
-    // int16_t prev_y = m->y;
 
     // consume motion of trackball.
     int16_t div = 1 << (keyball_get_scroll_div() - 1);

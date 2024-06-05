@@ -70,7 +70,8 @@ void matrix_init_kb(void) {
 bool is_alt_tab_enabled = false;
 bool is_alt_tab_active = false;
 uint16_t esc_timer = 0;
-uint16_t rgui_timer = 0;
+uint16_t enter_timer = 0;
+uint16_t lang2_timer = 0;
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   bool resume = true;
@@ -112,14 +113,14 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       if (record->event.pressed) {
         // 右コマンドを押した時はショートカットきーを打ちたい時なのでマウスレイヤを抜ける。
         layer_off(AUTO_MOUSE_DEFAULT_LAYER);
-        rgui_timer = timer_read();
+        enter_timer = timer_read();
       } else {
         // タップでエンターキー発動。
         // 右コマンド認識までのタイムラグを作りたくないので、RGUI(kc)ではなく自前でタップを実装
         resume = false;
         unregister_code(KC_RGUI); // R command
         uint16_t timer = timer_read();
-        if (timer - rgui_timer <= TAPPING_TERM) {
+        if (timer - enter_timer <= TAPPING_TERM) {
           tap_code(KC_ENT);
         }
       }
@@ -139,6 +140,21 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         }
       }
       break;
+
+    case 20544: // MO(2)
+      // タップで英数発動
+      // LT(layer, kc)だとレイヤが有効になるのにタイムラグがある。
+      // 度々数字の入力に失敗するので、挙動を改善
+      if (record->event.pressed) {
+        lang2_timer = timer_read();
+      } else {
+        uint16_t timer = timer_read();
+        if (timer - lang2_timer <= TAPPING_TERM) {
+          tap_code(KC_LNG2);
+        }
+      }
+      break;
+    break;
 
     case 0x5F50:
       if (record->event.pressed) {
