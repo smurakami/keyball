@@ -170,7 +170,7 @@ void pointing_device_driver_set_cpi(uint16_t cpi) {
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
 #ifdef CONSOLE_ENABLE
-    uprintf("ballmove: %d %d\n", m->x, m->y);
+    uprintf("#osc ballmove %d %d\n", m->x, m->y);
 #endif
 
 #if KEYBALL_MODEL == 61 || KEYBALL_MODEL == 39 || KEYBALL_MODEL == 147 || KEYBALL_MODEL == 44
@@ -193,8 +193,10 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_move(keyball_motion_
 
 __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motion_t *m, report_mouse_t *r, bool is_left) {
 #ifdef CONSOLE_ENABLE
-    uprintf("ballscroll: %d %d\n", m->x, m->y);
+    uprintf("#osc ballscroll: %d %d\n", m->x, m->y);
 #endif
+    // int16_t prev_x = m->x;
+    // int16_t prev_y = m->y;
 
     // consume motion of trackball.
     int16_t div = 1 << (keyball_get_scroll_div() - 1);
@@ -247,6 +249,10 @@ __attribute__((weak)) void keyball_on_apply_motion_to_mouse_scroll(keyball_motio
 #if KEYBALL_SCROLL_INV
     r->h = -r->h;
     r->v = -r->v;
+#endif
+
+#ifdef CONSOLE_ENABLE
+    uprintf("#osc ballscroll_consumed: %d %d\n", prev_x - m->x, prev_y - m->y);
 #endif
 }
 
